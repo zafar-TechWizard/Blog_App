@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Dashboard</title>
+</head>
+<body>
+    <h1>Dashboard</h1>
+
+    {% if user.is_superuser %}
+        <h2>Admin View</h2>
+        <p>Welcome, Admin!</p>
+        <a href="{% url 'post_create' %}">Create a new post</a>
+        <ul>
+            {% for post in posts %}
+                <li>
+                    <a href="{% url 'post_edit' post.pk %}">{{ post.title }}</a> - {{ post.content }}
+                    <form action="{% url 'post_delete' post.pk %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit">Delete</button>
+                    </form>
+                    <span>Created on: {{ post.created_at }}</span>
+                </li>
+            {% empty %}
+                <li>No posts available.</li>
+            {% endfor %}
+        </ul>
+
+    {% else %}
+        <h2>Your Posts</h2>
+        <p>Hello, {{ user.username }}!</p>
+        <a href="{% url 'post_create' %}">Create a new post</a>
+        <ul>
+            {% for post in posts %}
+                <li>
+                    <a href="{% url 'post_edit' post.pk %}">{{ post.title }}</a> - {{ post.content }}
+                    <span>Created on: {{ post.created_at }}</span>
+                </li>
+            {% empty %}
+                <li>You have not created any posts yet.</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit">Log out</button>
+    </form>
+</body>
+</html>
