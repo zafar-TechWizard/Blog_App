@@ -1,27 +1,85 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Blog Posts</title>
-</head>
-<body>
-    <h1>Blog Posts</h1>
+{% extends 'base.html' %}
+
+{% block title %}Explore Inspiring Stories | BlogApp{% endblock %}
+
+{% block content %}
+<div class="home-container">
+    <header class="home-header">
+        <h1>Discover Inspiring Stories</h1>
+        <p class="subtitle">Explore a world of ideas, experiences, and insights from diverse voices.</p>
+    </header>
+
     {% if user.is_authenticated %}
-        <p>Hello, {{ user.username }}!</p>
-        <form method="post" action="{% url 'logout' %}">
-            {% csrf_token %}
-            <button type="submit">Log out</button>
-        </form>
-    {% else %}
-        <a href="{% url 'login' %}">Log in</a>
-        <a href="{% url 'register' %}">Sign up</a>
+        <div class="welcome-banner">
+            <div class="welcome-message">
+                <i class="fas fa-user-circle"></i>
+                <p>Welcome back, <strong>{{ user.username }}</strong>! Ready to inspire?</p>
+            </div>
+            <a href="{% url 'post_create' %}" class="btn btn-primary">
+                <i class="fas fa-pen"></i> Create New Post
+            </a>
+        </div>
     {% endif %}
-    <ul>
-        {% for post in posts %}
-            <li><a href="{% url 'post_edit' post.pk %}">{{ post.title }}</a>
-                <br> {{ post.content }}</li>
-        {% empty %}
-            <li>No posts available.</li>
-        {% endfor %}
-    </ul>
-</body>
-</html>
+
+    <section class="featured-posts">
+        <h2 class="section-title">Featured Stories</h2>
+        <div class="featured-grid">
+            {% for post in featured_posts|slice:":3" %}
+                <article class="featured-card" style="background-image: url('{{ post.image.url|default:'https://via.placeholder.com/800x600' }}')">
+                    <div class="featured-content">
+                        <h3 class="featured-title">{{ post.title }}</h3>
+                        <p class="featured-excerpt">{{ post.content|truncatewords:15 }}</p>
+                        <a href="{% url 'post_detail' post.pk %}" class="btn btn-light">Read More</a>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="recent-posts">
+        <h2 class="section-title">Latest Stories</h2>
+        <div class="post-grid">
+            {% for post in posts %}
+                <article class="post-card">
+                    <div class="post-image">
+                        <img src="{{ post.image.url|default:'https://via.placeholder.com/300x200' }}" alt="{{ post.title }}">
+                    </div>
+                    <div class="post-content">
+                        <h3 class="post-title">{{ post.title }}</h3>
+                        <p class="post-excerpt">{{ post.content|truncatewords:20 }}</p>
+                        <div class="post-meta">
+                            <span class="author"><i class="fas fa-user"></i> {{ post.author.username }}</span>
+                            <span class="date"><i class="far fa-calendar-alt"></i> {{ post.created_at|date:"M d, Y" }}</span>
+                        </div>
+                        <a href="{% url 'post_detail' post.pk %}" class="btn btn-outline">Read Full Story</a>
+                    </div>
+                </article>
+            {% empty %}
+                <div class="no-posts">
+                    <i class="fas fa-pen-fancy fa-3x"></i>
+                    <p>No stories yet. Be the first to share your inspiration!</p>
+                    <a href="{% url 'post_create' %}" class="btn btn-primary">Start Writing</a>
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    {% if is_paginated %}
+        <nav class="pagination" aria-label="Page navigation">
+            <ul class="pagination-list">
+                {% if page_obj.has_previous %}
+                    <li><a href="?page=1" class="pagination-link" aria-label="Go to first page">&laquo; First</a></li>
+                    <li><a href="?page={{ page_obj.previous_page_number }}" class="pagination-link" aria-label="Go to previous page">Previous</a></li>
+                {% endif %}
+
+                <li><span class="pagination-link is-current" aria-current="page">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+
+                {% if page_obj.has_next %}
+                    <li><a href="?page={{ page_obj.next_page_number }}" class="pagination-link" aria-label="Go to next page">Next</a></li>
+                    <li><a href="?page={{ page_obj.paginator.num_pages }}" class="pagination-link" aria-label="Go to last page">Last &raquo;</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+</div>
+{% endblock %}

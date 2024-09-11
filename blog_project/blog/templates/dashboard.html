@@ -1,49 +1,101 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>User Dashboard</title>
-</head>
-<body>
-    <h1>Dashboard</h1>
+{% extends 'base.html' %}
 
-    {% if user.is_superuser %}
-        <h2>Admin View</h2>
-        <p>Welcome, Admin!</p>
-        <a href="{% url 'post_create' %}">Create a new post</a>
-        <ul>
+{% block title %}Dashboard | BlogApp{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <header class="dashboard-header">
+        <div class="dashboard-title">
+            <h1>Dashboard</h1>
+            <p class="user-greeting">
+                {% if user.is_superuser %}
+                    Welcome, Admin!
+                {% else %}
+                    Hello, {{ user.username }}!
+                {% endif %}
+            </p>
+        </div>
+        <div class="dashboard-actions">
+            <a href="{% url 'post_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Create New Post
+            </a>
+            {% if user.is_superuser %}
+                <a href="{% url 'post_review_list' %}" class="btn btn-secondary">
+                    <i class="fas fa-tasks"></i> Review Posts
+                </a>
+            {% endif %}
+        </div>
+    </header>
+
+    <div class="dashboard-overview">
+        <div class="dashboard-stats">
+            <div class="stat-card">
+                <i class="fas fa-file-alt stat-icon"></i>
+                <div class="stat-content">
+                    <h3>Total Posts</h3>
+                    <p class="stat-number">{{ total_posts }}</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-check-circle stat-icon"></i>
+                <div class="stat-content">
+                    <h3>Published</h3>
+                    <p class="stat-number">{{ approved_posts }}</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-clock stat-icon"></i>
+                <div class="stat-content">
+                    <h3>Pending</h3>
+                    <p class="stat-number">{{ pending_posts }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="recent-posts">
+        <h2>Your Recent Posts</h2>
+        <div class="post-list">
             {% for post in posts %}
-                <li>
-                    <a href="{% url 'post_edit' post.pk %}">{{ post.title }}</a> - {{ post.content }}
-                    <form action="{% url 'post_delete' post.pk %}" method="post" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit">Delete</button>
-                    </form>
-                    <span>Created on: {{ post.created_at }}</span>
-                </li>
+                <article class="post-card">
+                    <div class="post-content">
+                        <h3 class="post-title">{{ post.title }}</h3>
+                        <p class="post-excerpt">{{ post.content|truncatewords:20 }}</p>
+                        <div class="post-meta">
+                            <span class="post-date">
+                                <i class="far fa-calendar-alt"></i> {{ post.created_at|date:"F d, Y" }}
+                            </span>
+                            <span class="post-status {{ post.status|lower }}">
+                                <i class="fas fa-circle"></i> {{ post.status }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="post-actions">
+                        <a href="{% url 'post_edit' post.pk %}" class="btn btn-small btn-edit">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        {% if user.is_superuser %}
+                            <form action="{% url 'post_delete' post.pk %}" method="post" class="delete-form">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-small btn-danger">
+                                    <i class="fas fa-trash-alt"></i> Delete
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </article>
             {% empty %}
-                <li>No posts available.</li>
+                <div class="no-posts">
+                    <i class="fas fa-inbox fa-3x"></i>
+                    <p>You haven't created any posts yet.</p>
+                    <a href="{% url 'post_create' %}" class="btn btn-primary">Create Your First Post</a>
+                </div>
             {% endfor %}
-        </ul>
+        </div>
+    </section>
+</div>
+{% endblock %}
 
-    {% else %}
-        <h2>Your Posts</h2>
-        <p>Hello, {{ user.username }}!</p>
-        <a href="{% url 'post_create' %}">Create a new post</a>
-        <ul>
-            {% for post in posts %}
-                <li>
-                    <a href="{% url 'post_edit' post.pk %}">{{ post.title }}</a> - {{ post.content }}
-                    <span>Created on: {{ post.created_at }}</span>
-                </li>
-            {% empty %}
-                <li>You have not created any posts yet.</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
-
-    <form method="post" action="{% url 'logout' %}">
-        {% csrf_token %}
-        <button type="submit">Log out</button>
-    </form>
-</body>
-</html>
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+{% endblock %}

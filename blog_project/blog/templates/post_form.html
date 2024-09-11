@@ -1,15 +1,13 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Post Form</title>
-</head>
-<body>
-    <h1>Post Form</h1>
+{% extends 'base.html' %}
+
+{% block title %}{% if form.instance.pk %}Edit Post{% else %}Create Post{% endif %}{% endblock %}
+
+{% block content %}
+    <h1>{% if form.instance.pk %}Edit Post{% else %}Create Post{% endif %}</h1>
     <form method="post">
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit">Save</button>
     </form>
-    <a href="{% url 'post_list' %}">Back to posts</a>
-</body>
-</html>
+    <a href="{% url 'dashboard' %}">Back to dashboard</a>
+{% endblock %}
