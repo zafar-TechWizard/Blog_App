@@ -25,11 +25,13 @@
         <h2 class="section-title">Featured Stories</h2>
         <div class="featured-grid">
             {% for post in featured_posts|slice:":3" %}
-                <article class="featured-card" style="background-image: url('{{ post.image.url|default:'https://via.placeholder.com/800x600' }}')">
+                <article class="featured-card" style="background-image: url('{{ post.image.url|default:'https://via.placeholder.com/800x600' }}');">
                     <div class="featured-content">
                         <h3 class="featured-title">{{ post.title }}</h3>
-                        <p class="featured-excerpt">{{ post.content|truncatewords:15 }}</p>
-                        <a href="{% url 'post_detail' post.pk %}" class="btn btn-light">Read More</a>
+                        <div class="featured-bottom">
+                            <p class="featured-excerpt">{{ post.content|truncatewords:15 }}</p>
+                            <a href="{% url 'post_detail' post.pk %}" class="btn btn-light">Read More</a>
+                        </div>
                     </div>
                 </article>
             {% endfor %}

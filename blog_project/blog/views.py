@@ -87,11 +87,14 @@ class PostListView(ListView):
     model = Post
     template_name = 'post_list.html'
     context_object_name = 'posts'
-    paginate_by = 6  # Adjust this number as needed
+    paginate_by = 6
+
+    def get_queryset(self):
+        return Post.objects.filter(status=Post.APPROVED).order_by('-created_at')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['featured_post'] = Post.objects.filter(status=Post.APPROVED).order_by('-created_at').first()
+        context['featured_posts'] = Post.objects.filter(status=Post.APPROVED).order_by('-created_at')[:3]
         return context
 
 def post_list(request):
